@@ -71,11 +71,14 @@ library(reshape2)
 
 actMeltDate<-melt(act,id.vars="date",measure.vars="steps",na.rm=TRUE)
 actCastDate<-dcast(actMeltDate,date~variable,sum)
+```
+
+```r
 plot(actCastDate$date,actCastDate$steps,type="h",main="Histogram of Daily steps",xlab="Date",ylab="Steps per day",col="green",lwd=8)
 abline(h=mean(actCastDate$steps,na.rm=TRUE),col="red",lwd=2)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+![](PA1_template_files/figure-html/histogram-1.png)<!-- -->
 
 ## What is mean total number of steps taken per day?
 
@@ -124,11 +127,14 @@ require(data.table)
 ```r
 actmeltInterval<-melt(act,id.vars="interval",measure.vars="steps",na.rm=TRUE)
 actCastInterval<-dcast(actmeltInterval,interval~variable,mean)
+```
+
+```r
 plot(actCastInterval$interval,actCastInterval$steps,type="l",main="Frequency of steps taken at each interval",xlab="Interval ID", ylab="Steps",col="blue",lwd=2)
 abline(h=mean(actCastInterval$steps,na.rm = TRUE),col="red",lwd=2)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+![](PA1_template_files/figure-html/daily-1.png)<!-- -->
 #The 5-minute interval that, on average, contains the maximum number of steps
 
 ```r
@@ -181,7 +187,7 @@ plot(actCastDateNoNA$date,actCastDateNoNA$steps,type="h",main="Histogram of Dail
 abline(h=mean(actCastDateNoNA$steps),col="red",lwd=2)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](PA1_template_files/figure-html/histogram_no_NAs-1.png)<!-- -->
 
 ```r
 paste("Mean daily steps=",mean(actCastDateNoNA$steps,na.rm = TRUE))
@@ -225,11 +231,41 @@ actCastWeekend<-dcast(actMeltWeekend,interval~variable,mean)
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-``{r echo=TRUE}
+
+```r
 library(ggplot2)
 library(gridExtra)
-plot1<-qplot(actCastWeekday$interval,actCastWeekday$steps,geom="line",data=actCastWeekday,type="bar",main="Steps by Interval-Weekday",xlab="Interval ID", ylab="Number of Steps")
-plot2<-qplot(actCastWeekend$interval,actCastWeekend$steps,geom="line",data=actCastWeekend,type="bar",main="Steps by Interval-Weekend",xlab="Interval ID", ylab="Number of Steps")
-grid.arrange(plot1,plot2,nrow=2)
+```
 
 ```
+## 
+## Attaching package: 'gridExtra'
+```
+
+```
+## The following object is masked from 'package:dplyr':
+## 
+##     combine
+```
+
+```r
+plot1<-qplot(actCastWeekday$interval,actCastWeekday$steps,geom="line",data=actCastWeekday,type="bar",main="Steps by Interval-Weekday",xlab="Interval ID", ylab="Number of Steps")
+```
+
+```
+## Warning: Ignoring unknown parameters: type
+```
+
+```r
+plot2<-qplot(actCastWeekend$interval,actCastWeekend$steps,geom="line",data=actCastWeekend,type="bar",main="Steps by Interval-Weekend",xlab="Interval ID", ylab="Number of Steps")
+```
+
+```
+## Warning: Ignoring unknown parameters: type
+```
+
+```r
+grid.arrange(plot1,plot2,nrow=2)
+```
+
+![](PA1_template_files/figure-html/weekend_comparison-1.png)<!-- -->
