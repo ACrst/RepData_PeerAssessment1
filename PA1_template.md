@@ -1,0 +1,129 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+author: "ACrst"
+date: "17 April 2019"
+  output:  
+  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading and preprocessing the data
+
+```{r echo=TRUE}
+if(!exists("activity.csv")){
+  unzip("activity.zip")
+}
+if(!exists("activity.csv")){
+act<-read.csv("activity.csv")
+}
+
+library(lubridate)
+act$date<-as.Date(act$date)
+```
+#Histogram of the total number of steps taken each day
+```{r echo=TRUE}
+library(dplyr)
+library(reshape2)
+
+actMeltDate<-melt(act,id.vars="date",measure.vars="steps",na.rm=TRUE)
+actCastDate<-dcast(actMeltDate,date~variable,sum)
+plot(actCastDate$date,actCastDate$steps,type="h",main="Histogram of Daily steps",xlab="Date",ylab="Steps per day",col="green",lwd=8)
+abline(h=mean(actCastDate$steps,na.rm=TRUE),col="red",lwd=2)
+
+```
+
+## What is mean total number of steps taken per day?
+```{r echo=TRUE}
+meansteps<-mean(actCastDate$steps, na.rm = TRUE)
+mediansteps<-median(actCastDate$steps,na.rm = TRUE)
+
+```
+The mean and median number of steps taken each day are `r round(meansteps,2)` and `r round(mediansteps,2)` respectively.
+
+## What is the average daily activity pattern?
+
+```{r echo=TRUE}
+require(dplyr)
+require(data.table)
+actmeltInterval<-melt(act,id.vars="interval",measure.vars="steps",na.rm=TRUE)
+actCastInterval<-dcast(actmeltInterval,interval~variable,mean)
+plot(actCastInterval$interval,actCastInterval$steps,type="l",main="Frequency of steps taken at each interval",xlab="Interval ID", ylab="Steps",col="blue",lwd=2)
+abline(h=mean(actCastInterval$steps,na.rm = TRUE),col="red",lwd=2)
+```
+#The 5-minute interval that, on average, contains the maximum number of steps
+```{r echo=TRUE}
+
+
+paste("Interval with max value=",actCastInterval$interval[which(actCastInterval$steps==max(actCastInterval$steps))])
+paste("Maximum interval mean steps=",max(actCastInterval$steps))
+```
+
+
+## Imputing missing values
+```{r echo=TRUE}
+sum(is.na(act$steps))
+
+```
+Since there are a considerable number of missing values, we can replace the NAs with the mean for the particular interval number. For example, if the average number of steps taken during the interval x is y, we will replace each each NA with the corresponding y value for that row. Then we will recalculate the steps per day to see how much it differs  from the original result(with NAs included).
+
+```{r echo=TRUE}
+stepsperInterval<-actCastInterval
+actNoNA<-act
+actMerge=merge(actNoNA,stepsperInterval,by="interval",suffixes=c(".act",".spi"))
+naIndex=which(is.na(actNoNA$steps))
+actNoNA[naIndex,"steps"]=actMerge[naIndex,"steps.spi"]
+
+
+```
+Melt new data frame to prep for casting by date
+```{r echo=TRUE}
+actMeltDateNoNA<-melt(actNoNA,id.vars="date",measure.vars="steps",na.rm=FALSE)
+actCastDateNoNA<-dcast(actMeltDateNoNA,date~variable,sum)
+
+```
+#Histogram of the total number of steps taken each day after missing values are imputed
+
+```{r echo=TRUE}
+plot(actCastDateNoNA$date,actCastDateNoNA$steps,type="h",main="Histogram of Daily steps (Imputed NA values)",xlab="Date",ylab="Steps",col="gray",lwd=8)
+abline(h=mean(actCastDateNoNA$steps),col="red",lwd=2)
+paste("Mean daily steps=",mean(actCastDateNoNA$steps,na.rm = TRUE))
+paste("Median daily steps=",median(actCastDateNoNA$steps,na.rm = TRUE))
+
+```
+On a percentage basis, the difference between the results in oroginal and new data is very little.The maximum daily value set replacing the NAs vs replacing NAs with mean was much more significant.
+
+#Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+
+```{r echo=TRUE}
+for(i in 1:nrow(actNoNA)){
+  if(weekdays(actNoNA$date[i])=="Saturday" | weekdays(actNoNA$date[i])=="Sunday"){
+    actNoNA$dayOfWeek[i]="weekend"
+  } else{
+     actNoNA$dayOfWeek[i]="weekday"
+  }
+}
+
+
+actWeekday<-subset(actNoNA,dayOfWeek=="weekday")
+actWeekend<-subset(actNoNA,dayOfWeek=="weekend")
+
+actMeltWeekday<-melt(actWeekday,id.vars="interval",measure.vars="steps")
+actMeltWeekend<-melt(actWeekend,id.vars="interval",measure.vars="steps")
+actCastWeekday<-dcast(actMeltWeekday,interval~variable,mean)
+actCastWeekend<-dcast(actMeltWeekend,interval~variable,mean)
+```
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+``{r echo=TRUE}
+library(ggplot2)
+library(gridExtra)
+plot1<-qplot(actCastWeekday$interval,actCastWeekday$steps,geom="line",data=actCastWeekday,type="bar",main="Steps by Interval-Weekday",xlab="Interval ID", ylab="Number of Steps")
+plot2<-qplot(actCastWeekend$interval,actCastWeekend$steps,geom="line",data=actCastWeekend,type="bar",main="Steps by Interval-Weekend",xlab="Interval ID", ylab="Number of Steps")
+grid.arrange(plot1,plot2,nrow=2)
+
+```
