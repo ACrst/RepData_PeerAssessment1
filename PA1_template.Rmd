@@ -31,6 +31,9 @@ library(reshape2)
 
 actMeltDate<-melt(act,id.vars="date",measure.vars="steps",na.rm=TRUE)
 actCastDate<-dcast(actMeltDate,date~variable,sum)
+```
+```{r histogram,echo=TRUE}
+
 plot(actCastDate$date,actCastDate$steps,type="h",main="Histogram of Daily steps",xlab="Date",ylab="Steps per day",col="green",lwd=8)
 abline(h=mean(actCastDate$steps,na.rm=TRUE),col="red",lwd=2)
 
@@ -51,6 +54,9 @@ require(dplyr)
 require(data.table)
 actmeltInterval<-melt(act,id.vars="interval",measure.vars="steps",na.rm=TRUE)
 actCastInterval<-dcast(actmeltInterval,interval~variable,mean)
+```
+```{r daily,fig.width=12,echo=TRUE}
+
 plot(actCastInterval$interval,actCastInterval$steps,type="l",main="Frequency of steps taken at each interval",xlab="Interval ID", ylab="Steps",col="blue",lwd=2)
 abline(h=mean(actCastInterval$steps,na.rm = TRUE),col="red",lwd=2)
 ```
@@ -87,7 +93,8 @@ actCastDateNoNA<-dcast(actMeltDateNoNA,date~variable,sum)
 ```
 #Histogram of the total number of steps taken each day after missing values are imputed
 
-```{r echo=TRUE}
+```{r histogram_no_NAs,echo=TRUE}
+
 plot(actCastDateNoNA$date,actCastDateNoNA$steps,type="h",main="Histogram of Daily steps (Imputed NA values)",xlab="Date",ylab="Steps",col="gray",lwd=8)
 abline(h=mean(actCastDateNoNA$steps),col="red",lwd=2)
 paste("Mean daily steps=",mean(actCastDateNoNA$steps,na.rm = TRUE))
@@ -120,9 +127,11 @@ actCastWeekend<-dcast(actMeltWeekend,interval~variable,mean)
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-``{r echo=TRUE}
+```{r weekend_comparison,fig.width=10,echo=TRUE}
 library(ggplot2)
 library(gridExtra)
+
+
 plot1<-qplot(actCastWeekday$interval,actCastWeekday$steps,geom="line",data=actCastWeekday,type="bar",main="Steps by Interval-Weekday",xlab="Interval ID", ylab="Number of Steps")
 plot2<-qplot(actCastWeekend$interval,actCastWeekend$steps,geom="line",data=actCastWeekend,type="bar",main="Steps by Interval-Weekend",xlab="Interval ID", ylab="Number of Steps")
 grid.arrange(plot1,plot2,nrow=2)
