@@ -28,7 +28,7 @@ act$date<-as.Date(act$date)
 ```{r echo=TRUE}
 library(dplyr)
 library(reshape2)
-
+ 
 actMeltDate<-melt(act,id.vars="date",measure.vars="steps",na.rm=TRUE)
 actCastDate<-dcast(actMeltDate,date~variable,sum)
 ```

@@ -229,7 +229,7 @@ library(lubridate)</code></pre>
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
 <pre class="r"><code>library(reshape2)
-
+ 
 actMeltDate&lt;-melt(act,id.vars=&quot;date&quot;,measure.vars=&quot;steps&quot;,na.rm=TRUE)
 actCastDate&lt;-dcast(actMeltDate,date~variable,sum)</code></pre>
 <pre class="r"><code>plot(actCastDate$date,actCastDate$steps,type=&quot;h&quot;,main=&quot;Histogram of Daily steps&quot;,xlab=&quot;Date&quot;,ylab=&quot;Steps per day&quot;,col=&quot;green&quot;,lwd=8)
